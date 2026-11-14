@@ -1,0 +1,705 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+Flights Management
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/flights.css'
+    ) }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="flights-page">
+
+
+    <!-- =========================================
+         HEADER
+    ========================================== -->
+
+    <div class="page-header">
+
+        <div>
+
+            <h2>
+                Flight Management
+            </h2>
+
+            <p>
+                Create, manage and monitor airport flights.
+            </p>
+
+        </div>
+
+        <button
+            class="btn btn-primary"
+            id="openFlightModal"
+        >
+            + Add Flight
+        </button>
+
+    </div>
+
+
+    <!-- =========================================
+         FILTERS
+    ========================================== -->
+
+    <div class="card filter-card">
+
+        <div class="filter-row">
+
+            <div class="form-group">
+
+                <label>
+                    Airport
+                </label>
+
+                <select
+                    id="filterAirport"
+                    class="form-control"
+                >
+
+                    <option value="">
+                        All Airports
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Status
+                </label>
+
+                <select
+                    id="filterStatus"
+                    class="form-control"
+                >
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                    <option value="WAITING">
+                        WAITING
+                    </option>
+
+                    <option value="SCHEDULED">
+                        SCHEDULED
+                    </option>
+
+                    <option value="IN_PROGRESS">
+                        IN PROGRESS
+                    </option>
+
+                    <option value="COMPLETED">
+                        COMPLETED
+                    </option>
+
+                    <option value="CANCELLED">
+                        CANCELLED
+                    </option>
+
+                    <option value="EMERGENCY">
+                        EMERGENCY
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <button
+                class="btn btn-secondary"
+                id="refreshFlights"
+            >
+                Refresh
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         FLIGHTS TABLE
+    ========================================== -->
+
+    <div class="card">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    All Flights
+                </h2>
+
+                <p>
+                    Flights stored in the airport database.
+                </p>
+
+            </div>
+
+            <div
+                id="flightCount"
+                class="count-badge"
+            >
+                0 Flights
+            </div>
+
+        </div>
+
+
+        <div
+            id="flightLoading"
+            class="empty-state"
+        >
+            Loading flights...
+        </div>
+
+
+        <div
+            id="flightTableWrapper"
+            class="table-container"
+            style="display: none;"
+        >
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Flight
+                        </th>
+
+                        <th>
+                            Airline
+                        </th>
+
+                        <th>
+                            Airport
+                        </th>
+
+                        <th>
+                            Operation
+                        </th>
+
+                        <th>
+                            Situation
+                        </th>
+
+                        <th>
+                            Processing
+                        </th>
+
+                        <th>
+                            Fuel
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody
+                    id="flightTableBody"
+                >
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     ADD / EDIT MODAL
+========================================== -->
+
+<div
+    id="flightModal"
+    class="modal-overlay"
+    style="display: none;"
+>
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2 id="modalTitle">
+                    Add Flight
+                </h2>
+
+                <p>
+                    Enter flight information.
+                </p>
+
+            </div>
+
+            <button
+                id="closeFlightModal"
+                class="modal-close"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form
+            id="flightForm"
+        >
+
+            <input
+                type="hidden"
+                id="flightId"
+            >
+
+
+            <div class="form-grid">
+
+
+                <!-- FLIGHT NUMBER -->
+
+                <div class="form-group">
+
+                    <label>
+                        Flight Number *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="flightNumber"
+                        class="form-control"
+                        placeholder="AI101"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- AIRLINE -->
+
+                <div class="form-group">
+
+                    <label>
+                        Airline *
+                    </label>
+
+                    <select
+                        id="airlineId"
+                        class="form-control"
+                        required
+                    >
+
+                        <option value="">
+                            Select Airline
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- AIRCRAFT -->
+
+                <div class="form-group">
+
+                    <label>
+                        Aircraft *
+                    </label>
+
+                    <select
+                        id="aircraftId"
+                        class="form-control"
+                        required
+                    >
+
+                        <option value="">
+                            Select Aircraft
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- AIRPORT -->
+
+                <div class="form-group">
+
+                    <label>
+                        Airport *
+                    </label>
+
+                    <select
+                        id="airportId"
+                        class="form-control"
+                        required
+                    >
+
+                        <option value="">
+                            Select Airport
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- TERMINAL -->
+
+                <div class="form-group">
+
+                    <label>
+                        Terminal
+                    </label>
+
+                    <select
+                        id="terminalId"
+                        class="form-control"
+                    >
+
+                        <option value="">
+                            Select Terminal
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- GATE -->
+
+                <div class="form-group">
+
+                    <label>
+                        Gate
+                    </label>
+
+                    <select
+                        id="gateId"
+                        class="form-control"
+                    >
+
+                        <option value="">
+                            Select Gate
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- OPERATION -->
+
+                <div class="form-group">
+
+                    <label>
+                        Operation Type *
+                    </label>
+
+                    <select
+                        id="operationType"
+                        class="form-control"
+                        required
+                    >
+
+                        <option value="">
+                            Select Operation
+                        </option>
+
+                        <option value="ARRIVAL">
+                            ARRIVAL
+                        </option>
+
+                        <option value="DEPARTURE">
+                            DEPARTURE
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ARRIVAL -->
+
+                <div
+                    class="form-group"
+                    id="arrivalGroup"
+                >
+
+                    <label>
+                        Arrival Time
+                    </label>
+
+                    <input
+                        type="datetime-local"
+                        id="arrivalTime"
+                        class="form-control"
+                    >
+
+                </div>
+
+
+                <!-- DEPARTURE -->
+
+                <div
+                    class="form-group"
+                    id="departureGroup"
+                >
+
+                    <label>
+                        Departure Time
+                    </label>
+
+                    <input
+                        type="datetime-local"
+                        id="departureTime"
+                        class="form-control"
+                    >
+
+                </div>
+
+
+                <!-- PROCESSING -->
+
+                <div class="form-group">
+
+                    <label>
+                        Processing Time (Minutes)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="processingTime"
+                        class="form-control"
+                        value="10"
+                        min="1"
+                    >
+
+                </div>
+
+
+                <!-- PRIORITY -->
+
+                <div class="form-group">
+
+                    <label>
+                        Priority
+                    </label>
+
+                    <input
+                        type="number"
+                        id="priority"
+                        class="form-control"
+                        value="5"
+                        min="1"
+                        max="10"
+                    >
+
+                </div>
+
+
+                <!-- SITUATION -->
+
+                <div class="form-group">
+
+                    <label>
+                        Current Situation
+                    </label>
+
+                    <select
+                        id="currentSituation"
+                        class="form-control"
+                    >
+
+                        <option value="NORMAL">
+                            NORMAL
+                        </option>
+
+                        <option value="EMERGENCY">
+                            EMERGENCY
+                        </option>
+
+                        <option value="LOW_FUEL">
+                            LOW FUEL
+                        </option>
+
+                        <option value="MEDICAL">
+                            MEDICAL
+                        </option>
+
+                        <option value="WEATHER">
+                            WEATHER
+                        </option>
+
+                        <option value="VIP">
+                            VIP
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- FUEL -->
+
+                <div class="form-group">
+
+                    <label>
+                        Fuel Percentage
+                    </label>
+
+                    <input
+                        type="number"
+                        id="fuelPercentage"
+                        class="form-control"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        placeholder="65.5"
+                    >
+
+                </div>
+
+
+                <!-- PASSENGERS -->
+
+                <div class="form-group">
+
+                    <label>
+                        Passenger Count
+                    </label>
+
+                    <input
+                        type="number"
+                        id="passengerCount"
+                        class="form-control"
+                        min="0"
+                        placeholder="180"
+                    >
+
+                </div>
+
+
+                <!-- EMERGENCY -->
+
+                <div class="form-group">
+
+                    <label>
+                        Emergency
+                    </label>
+
+                    <select
+                        id="isEmergency"
+                        class="form-control"
+                    >
+
+                        <option value="false">
+                            No
+                        </option>
+
+                        <option value="true">
+                            Yes
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- EMERGENCY REASON -->
+
+                <div class="form-group full-width">
+
+                    <label>
+                        Emergency Reason
+                    </label>
+
+                    <input
+                        type="text"
+                        id="emergencyReason"
+                        class="form-control"
+                        placeholder="Low fuel emergency"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="cancelFlight"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Save Flight
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<div
+    id="flightToast"
+    class="scheduler-toast"
+></div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/flights.js'
+    ) }}"
+></script>
+
+{% endblock %}

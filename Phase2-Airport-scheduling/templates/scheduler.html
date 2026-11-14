@@ -1,0 +1,569 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+Airport Scheduler
+{% endblock %}
+
+{% block content %}
+
+<div class="scheduler-page">
+
+    <!-- =========================================
+         CONTROL PANEL
+    ========================================== -->
+
+    <div class="scheduler-control card">
+
+        <div class="section-heading">
+
+            <div>
+                <h2>Runway Scheduling</h2>
+
+                <p>
+                    Select an airport and scheduling
+                    algorithm to process waiting flights.
+                </p>
+            </div>
+
+            <div class="scheduler-status">
+                <span class="status-dot"></span>
+                Scheduler Ready
+            </div>
+
+        </div>
+
+
+        <div class="scheduler-form">
+
+            <!-- AIRPORT -->
+
+            <div class="form-group">
+
+                <label for="airportSelect">
+                    Airport
+                </label>
+
+                <select
+                    id="airportSelect"
+                    class="form-control"
+                >
+
+                    <option value="">
+                        Select Airport
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- ALGORITHM -->
+
+            <div class="form-group">
+
+                <label for="algorithmSelect">
+                    Scheduling Algorithm
+                </label>
+
+                <select
+                    id="algorithmSelect"
+                    class="form-control"
+                >
+
+                    <option value="">
+                        Select Algorithm
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- TIME QUANTUM -->
+
+            <div
+                class="form-group"
+                id="quantumGroup"
+                style="display: none;"
+            >
+
+                <label for="timeQuantum">
+                    Time Quantum
+                </label>
+
+                <input
+                    type="number"
+                    id="timeQuantum"
+                    class="form-control"
+                    value="3"
+                    min="1"
+                >
+
+                <small>
+                    Used only for Round Robin.
+                </small>
+
+            </div>
+
+
+            <!-- RUN BUTTON -->
+
+            <div class="form-action">
+
+                <button
+                    type="button"
+                    id="runSchedulerBtn"
+                    class="btn btn-primary scheduler-run-btn"
+                >
+                    Run Scheduler
+                </button>
+
+                <button
+                    type="button"
+                    id="compareAllAlgorithmsBtn"
+                    class="btn btn-secondary"
+                >
+                    Compare All Algorithms
+                </button>
+
+                <small class="comparison-help">
+                    Compares all eight algorithms using the same active
+                    flights, including previously scheduled ones. This test
+                    does not save schedules or change flight statuses.
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         WAITING FLIGHTS
+    ========================================== -->
+
+    <div class="card">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>Waiting Flights</h2>
+
+                <p>
+                    Flights currently waiting for
+                    scheduling at the selected airport.
+                </p>
+
+            </div>
+
+            <div
+                id="flightCountBadge"
+                class="count-badge"
+            >
+                0 Flights
+            </div>
+
+        </div>
+
+
+        <div
+            id="flightsLoading"
+            class="empty-state"
+        >
+            Select an airport to load flights.
+        </div>
+
+
+        <div
+            id="flightsTableWrapper"
+            class="table-container"
+            style="display: none;"
+        >
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            #
+                        </th>
+
+                        <th>
+                            Flight
+                        </th>
+
+                        <th>
+                            Operation
+                        </th>
+
+                        <th>
+                            Situation
+                        </th>
+
+                        <th>
+                            Processing
+                        </th>
+
+                        <th>
+                            Fuel
+                        </th>
+
+                        <th>
+                            Passengers
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody
+                    id="flightsTableBody"
+                >
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         RESULT
+    ========================================== -->
+
+    <div
+        id="resultSection"
+        style="display: none;"
+    >
+
+        <div class="section-heading result-heading">
+
+            <div>
+
+                <h2>
+                    Scheduling Result
+                </h2>
+
+                <p id="resultMessage">
+                    Scheduler completed.
+                </p>
+
+            </div>
+
+            <div
+                id="resultStatus"
+                class="badge badge-success"
+            >
+                COMPLETED
+            </div>
+
+        </div>
+
+
+        <!-- METRICS -->
+
+        <div class="grid grid-4 metrics-grid">
+
+            <div class="card metric-card">
+
+                <div class="metric-label">
+                    Avg Waiting Time
+                </div>
+
+                <div
+                    id="avgWaiting"
+                    class="metric-value"
+                >
+                    0
+                </div>
+
+                <span>
+                    minutes
+                </span>
+
+            </div>
+
+
+            <div class="card metric-card">
+
+                <div class="metric-label">
+                    Avg Turnaround
+                </div>
+
+                <div
+                    id="avgTurnaround"
+                    class="metric-value"
+                >
+                    0
+                </div>
+
+                <span>
+                    minutes
+                </span>
+
+            </div>
+
+
+            <div class="card metric-card">
+
+                <div class="metric-label">
+                    Avg Response
+                </div>
+
+                <div
+                    id="avgResponse"
+                    class="metric-value"
+                >
+                    0
+                </div>
+
+                <span>
+                    minutes
+                </span>
+
+            </div>
+
+
+            <div class="card metric-card">
+
+                <div class="metric-label">
+                    Runway Utilization
+                </div>
+
+                <div
+                    id="runwayUtilization"
+                    class="metric-value"
+                >
+                    0
+                </div>
+
+                <span>
+                    %
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- SCHEDULED FLIGHTS -->
+
+        <div class="card">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>
+                        Final Assignments
+                    </h2>
+
+                    <p>
+                        Runway and ATC resources
+                        allocated to flights.
+                    </p>
+
+                </div>
+
+                <div
+                    id="scheduledCount"
+                    class="count-badge"
+                >
+                    0 Scheduled
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Queue
+                            </th>
+
+                            <th>
+                                Flight
+                            </th>
+
+                            <th>
+                                Situation
+                            </th>
+
+                            <th>
+                                Runway
+                            </th>
+
+                            <th>
+                                ATC
+                            </th>
+
+                            <th>
+                                Start
+                            </th>
+
+                            <th>
+                                End
+                            </th>
+
+                            <th>
+                                Waiting
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody
+                        id="scheduledTableBody"
+                    >
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- FAILED FLIGHTS -->
+
+        <div
+            id="failedSection"
+            class="card failed-card"
+            style="display: none;"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>
+                        Failed Allocations
+                    </h2>
+
+                    <p>
+                        Flights that could not receive
+                        the required resources.
+                    </p>
+
+                </div>
+
+                <div
+                    id="failedCount"
+                    class="count-badge danger-count"
+                >
+                    0 Failed
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Flight
+                            </th>
+
+                            <th>
+                                Stage
+                            </th>
+
+                            <th>
+                                Reason
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody
+                        id="failedTableBody"
+                    >
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         LOADING
+    ========================================== -->
+
+    <div
+        id="schedulerLoading"
+        class="loading-overlay"
+        style="display: none;"
+    >
+
+        <div class="loading-box">
+
+            <div class="loader"></div>
+
+            <h3>
+                Running Scheduler
+            </h3>
+
+            <p>
+                Checking algorithm, weather,
+                runway and ATC availability...
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         TOAST
+    ========================================== -->
+
+    <div
+        id="schedulerToast"
+        class="scheduler-toast"
+    ></div>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/scheduler.js'
+    ) }}"
+></script>
+
+{% endblock %}

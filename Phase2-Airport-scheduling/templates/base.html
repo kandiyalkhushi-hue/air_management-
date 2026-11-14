@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Intelligent Airport Runway Scheduling System
+    </title>
+
+
+    <!-- =================================================
+         MAIN CSS
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/style.css'
+        ) }}"
+    >
+
+
+    <!-- =================================================
+         SCHEDULER CSS
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/scheduler.css'
+        ) }}"
+    >
+
+
+    <!-- =================================================
+         PAGE SPECIFIC EXTRA CSS
+    ================================================== -->
+
+    {% block extra_css %}
+    {% endblock %}
+
+</head>
+
+
+<body>
+
+
+    <!-- =================================================
+         SIDEBAR
+    ================================================== -->
+
+    <aside class="sidebar">
+
+
+        <!-- LOGO -->
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                ✈
+            </div>
+
+
+            <div>
+
+                <h2>
+                    IA-RSS
+                </h2>
+
+                <span>
+                    Airport Scheduler
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             NAVIGATION
+        ================================================== -->
+
+        <nav class="sidebar-nav">
+
+
+            <!-- DASHBOARD -->
+
+            <a
+                href="/dashboard"
+                class="nav-item"
+            >
+
+                <span>
+                    ▣
+                </span>
+
+                Dashboard
+
+            </a>
+
+
+            <!-- AIRPORTS -->
+
+            <!--
+                IMPORTANT:
+                /airports is API endpoint.
+                Frontend page is /manage-airports.
+            -->
+
+            <a
+                href="/manage-airports"
+                class="nav-item"
+            >
+
+                <span>
+                    ⌂
+                </span>
+
+                Airports
+
+            </a>
+
+
+            <!-- FLIGHTS -->
+
+            <a
+    href="/manage-flights"
+    class="nav-item"
+>
+
+                <span>
+                    ✈
+                </span>
+
+                Flights
+
+            </a>
+
+
+            <!-- SCHEDULER -->
+
+            <a
+                href="/scheduler"
+                class="nav-item"
+            >
+
+                <span>
+                    ⚙
+                </span>
+
+                Scheduler
+
+            </a>
+
+
+            <!-- SCHEDULES -->
+
+            <a
+                href="/schedules"
+                class="nav-item"
+            >
+
+                <span>
+                    ☷
+                </span>
+
+                Schedules
+
+            </a>
+
+
+            <!-- ANALYTICS -->
+
+            <a
+                href="/analytics"
+                class="nav-item"
+            >
+
+                <span>
+                    ◈
+                </span>
+
+                Analytics
+
+            </a>
+
+        </nav>
+
+
+        <!-- =================================================
+             SIDEBAR FOOTER
+        ================================================== -->
+
+        <div class="sidebar-footer">
+
+            <div>
+
+                <span class="status-dot"></span>
+
+                System Online
+
+            </div>
+
+
+            <small>
+                OS + DBMS Simulator
+            </small>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =================================================
+         MAIN CONTENT
+    ================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- =================================================
+             TOP BAR
+        ================================================== -->
+
+        <header class="topbar">
+
+
+            <div>
+
+                <h1>
+
+                    {% block page_title %}
+
+                    Dashboard
+
+                    {% endblock %}
+
+                </h1>
+
+
+                <p>
+
+                    Intelligent Airport Runway
+                    Scheduling System
+
+                </p>
+
+            </div>
+
+
+            <!-- BACKEND STATUS -->
+
+            <div class="topbar-right">
+
+                <div class="system-status">
+
+                    <span class="status-dot"></span>
+
+                    Backend Connected
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             PAGE CONTENT
+        ================================================== -->
+
+        <section class="page-content">
+
+            {% block content %}
+
+            {% endblock %}
+
+        </section>
+
+    </main>
+
+
+    <!-- =================================================
+         COMMON API JAVASCRIPT
+    ================================================== -->
+
+    <script
+        src="{{ url_for(
+            'static',
+            filename='js/api.js'
+        ) }}"
+    ></script>
+
+
+    <!-- =================================================
+         PAGE SPECIFIC JAVASCRIPT
+    ================================================== -->
+
+    {% block scripts %}
+
+    {% endblock %}
+
+
+</body>
+
+</html>

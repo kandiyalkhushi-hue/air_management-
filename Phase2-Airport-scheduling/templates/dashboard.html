@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+
+{% block page_title %}
+Dashboard
+{% endblock %}
+
+
+{% block content %}
+
+<div class="grid grid-4">
+
+    <div class="card">
+
+        <div class="card-title">
+            Airports
+        </div>
+
+        <div
+            class="card-value"
+            id="airportCount"
+        >
+            0
+        </div>
+
+        <div class="card-subtitle">
+            Registered airports
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-title">
+            Waiting Flights
+        </div>
+
+        <div
+            class="card-value"
+            id="flightCount"
+        >
+            0
+        </div>
+
+        <div class="card-subtitle">
+            Flights waiting for scheduling
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-title">
+            Runways
+        </div>
+
+        <div
+            class="card-value"
+            id="runwayCount"
+        >
+            —
+        </div>
+
+        <div class="card-subtitle">
+            Airport runway resources
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-title">
+            Algorithms
+        </div>
+
+        <div
+            class="card-value"
+            id="algorithmCount"
+        >
+            8
+        </div>
+
+        <div class="card-subtitle">
+            OS scheduling algorithms
+        </div>
+
+    </div>
+
+</div>
+
+
+<div style="height: 24px;"></div>
+
+
+<div class="grid grid-2">
+
+    <div class="card">
+
+        <div class="card-title">
+            Scheduling System
+        </div>
+
+        <p
+            style="
+                color: #6b7280;
+                font-size: 13px;
+                line-height: 1.7;
+                margin-bottom: 18px;
+            "
+        >
+            Select an airport and run an OS
+            scheduling algorithm to automatically
+            allocate available runway and ATC
+            resources.
+        </p>
+
+        <a
+            href="/scheduler"
+            class="btn btn-primary"
+            style="
+                display: inline-block;
+                text-decoration: none;
+            "
+        >
+            Open Scheduler
+        </a>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-title">
+            Available Algorithms
+        </div>
+
+        <div
+            id="algorithmList"
+            style="
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-top: 15px;
+            "
+        >
+
+            <span class="badge badge-info">
+                FCFS
+            </span>
+
+            <span class="badge badge-info">
+                SJF
+            </span>
+
+            <span class="badge badge-info">
+                SRTF
+            </span>
+
+            <span class="badge badge-info">
+                PRIORITY
+            </span>
+
+            <span class="badge badge-info">
+                ROUND ROBIN
+            </span>
+
+            <span class="badge badge-info">
+                HRRN
+            </span>
+
+            <span class="badge badge-info">
+                MLQ
+            </span>
+
+            <span class="badge badge-info">
+                MLFQ
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div style="height: 24px;"></div>
+
+
+<div class="card">
+
+    <div class="card-title">
+        System Architecture
+    </div>
+
+    <div
+        style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        "
+    >
+
+        <span class="badge badge-info">
+            Flights
+        </span>
+
+        <strong>→</strong>
+
+        <span class="badge badge-info">
+            OS Scheduler
+        </span>
+
+        <strong>→</strong>
+
+        <span class="badge badge-info">
+            Weather
+        </span>
+
+        <strong>→</strong>
+
+        <span class="badge badge-info">
+            Runway
+        </span>
+
+        <strong>→</strong>
+
+        <span class="badge badge-info">
+            ATC
+        </span>
+
+        <strong>→</strong>
+
+        <span class="badge badge-success">
+            Final Schedule
+        </span>
+
+        <strong>→</strong>
+
+        <span class="badge badge-info">
+            MySQL
+        </span>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+
+async function loadDashboard() {
+
+    try {
+
+        const algorithms =
+            await getAlgorithms();
+
+        document.getElementById(
+            "algorithmCount"
+        ).textContent =
+            algorithms.total_algorithms;
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+    }
+
+}
+
+loadDashboard();
+
+</script>
+
+{% endblock %}

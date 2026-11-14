@@ -1,0 +1,812 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduled Flights | Airport Management</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f3f6fb;
+            color: #172033;
+            padding: 28px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 26px;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .refresh-btn, .back-btn {
+            border: none;
+            border-radius: 9px;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .refresh-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .back-btn {
+            background: white;
+            color: #334155;
+            border: 1px solid #dbe2ea;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+        }
+
+        .stat-card p {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .stat-card h2 {
+            font-size: 30px;
+        }
+
+        .filters, .table-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 22px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 14px;
+            align-items: end;
+        }
+
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .field input, .field select {
+            width: 100%;
+            height: 42px;
+            padding: 0 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+            color: #172033;
+        }
+
+        .clear-btn {
+            height: 42px;
+            padding: 0 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #f8fafc;
+            cursor: pointer;
+        }
+
+        .table-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .table-heading h2 {
+            font-size: 20px;
+            margin-bottom: 6px;
+        }
+
+        .table-heading p {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 1150px;
+            font-size: 13px;
+        }
+
+        thead {
+            background: #f8fafc;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 15px 13px;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        th {
+            color: #526078;
+            font-weight: 700;
+        }
+
+        tbody tr:hover {
+            background: #f8fbff;
+        }
+
+        .flight-number {
+            font-weight: 700;
+            color: #1d4ed8;
+        }
+
+        .muted {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-scheduled {
+            color: #1d4ed8;
+            background: #dbeafe;
+        }
+
+        .badge-active {
+            color: #047857;
+            background: #d1fae5;
+        }
+
+        .badge-completed {
+            color: #475569;
+            background: #e2e8f0;
+        }
+
+        .badge-cancelled {
+            color: #b91c1c;
+            background: #fee2e2;
+        }
+
+        .badge-other {
+            color: #92400e;
+            background: #fef3c7;
+        }
+
+        .countdown {
+            font-weight: 700;
+            color: #047857;
+        }
+
+        .countdown.overdue {
+            color: #b91c1c;
+        }
+
+        .countdown.completed {
+            color: #64748b;
+        }
+
+        .empty, .message {
+            text-align: center;
+            padding: 35px 15px;
+            color: #64748b;
+        }
+
+        .error {
+            color: #b91c1c;
+        }
+
+        .footer-note {
+            margin-top: 16px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1000px) {
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .filters {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 14px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .stats, .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card h2 {
+                font-size: 25px;
+            }
+
+            .table-card, .filters {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <header class="header">
+        <div>
+            <h1>Scheduled Flights</h1>
+            <p>Monitor flight schedules, airports, runways and ATC assignments.</p>
+        </div>
+
+        <div class="actions">
+            <a href="/" class="back-btn">Back to Dashboard</a>
+            <button class="refresh-btn" id="refreshBtn" onclick="loadSchedules()">
+                Refresh Data
+            </button>
+        </div>
+    </header>
+
+    <section class="stats">
+        <div class="stat-card">
+            <p>Total Records</p>
+            <h2 id="totalCount">—</h2>
+        </div>
+
+        <div class="stat-card">
+            <p>Upcoming Flights</p>
+            <h2 id="upcomingCount">—</h2>
+        </div>
+
+        <div class="stat-card">
+            <p>In Progress</p>
+            <h2 id="activeCount">—</h2>
+        </div>
+
+        <div class="stat-card">
+            <p>Completed</p>
+            <h2 id="completedCount">—</h2>
+        </div>
+    </section>
+
+    <section class="filters">
+        <div class="field">
+            <label for="searchInput">Search flight / airport / runway / ATC</label>
+            <input id="searchInput" type="text"
+                   placeholder="Search records...">
+        </div>
+
+        <div class="field">
+            <label for="statusFilter">Flight Status</label>
+            <select id="statusFilter">
+                <option value="">All statuses</option>
+                <option value="SCHEDULED">Scheduled</option>
+                <option value="IN_PROGRESS">In progress</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="CANCELLED">Cancelled</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="operationFilter">Operation</label>
+            <select id="operationFilter">
+                <option value="">All operations</option>
+                <option value="ARRIVAL">Arrival</option>
+                <option value="DEPARTURE">Departure</option>
+            </select>
+        </div>
+
+        <button class="clear-btn" onclick="clearFilters()">Clear Filters</button>
+    </section>
+
+    <section class="table-card">
+        <div class="table-heading">
+            <div>
+                <h2>All Scheduled Flights</h2>
+                <p>Runway and air traffic controller allocation details.</p>
+            </div>
+            <strong id="visibleCount">0 records</strong>
+        </div>
+
+        <div id="message" class="message">Loading scheduled flights...</div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Flight</th>
+                        <th>Operation</th>
+                        <th>Airport</th>
+                        <th>Runway</th>
+                        <th>ATC Controller</th>
+                        <th>Scheduled Start</th>
+                        <th>Scheduled End</th>
+                        <th>Time Remaining</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleTableBody"></tbody>
+            </table>
+        </div>
+
+        <p class="footer-note">
+            Countdown is calculated from the scheduled start time.
+            It does not confirm that an aircraft has actually taken off.
+            Actual departure requires a recorded departure time or updated flight status.
+        </p>
+    </section>
+</div>
+
+<script>
+    "use strict";
+
+    let allSchedules = [];
+    let countdownInterval = null;
+
+    // Change this endpoint if your backend uses a different API route.
+    const SCHEDULES_API = "/api/schedules";
+
+    function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, character => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        })[character]);
+    }
+
+    function getValue(record, keys, fallback = "—") {
+        for (const key of keys) {
+            const value = record?.[key];
+
+            if (value !== undefined && value !== null && value !== "") {
+                return value;
+            }
+        }
+
+        return fallback;
+    }
+
+    function getNestedValue(record, parentKeys, childKeys, fallback = "—") {
+        for (const parentKey of parentKeys) {
+            const parent = record?.[parentKey];
+
+            if (parent && typeof parent === "object") {
+                const value = getValue(parent, childKeys, null);
+
+                if (value !== null) {
+                    return value;
+                }
+            }
+        }
+
+        return getValue(record, childKeys, fallback);
+    }
+
+    function normalizeStatus(record) {
+        return String(getValue(
+            record,
+            ["flight_status", "status", "schedule_status"],
+            "SCHEDULED"
+        )).toUpperCase().replaceAll(" ", "_");
+    }
+
+    function statusBadge(status) {
+        let cssClass = "badge-other";
+
+        if (status === "SCHEDULED" || status === "WAITING") {
+            cssClass = "badge-scheduled";
+        } else if (
+            status === "IN_PROGRESS" ||
+            status === "AIRBORNE" ||
+            status === "BOARDING"
+        ) {
+            cssClass = "badge-active";
+        } else if (status === "COMPLETED" || status === "LANDED") {
+            cssClass = "badge-completed";
+        } else if (status === "CANCELLED" || status === "FAILED") {
+            cssClass = "badge-cancelled";
+        }
+
+        return `<span class="badge ${cssClass}">${escapeHtml(status.replaceAll("_", " "))}</span>`;
+    }
+
+    function parseDate(value) {
+        if (!value) return null;
+
+        // Avoid interpreting a timezone-free database timestamp as UTC.
+        const text = String(value).trim();
+        const normalized = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(text)
+            ? text.replace(" ", "T")
+            : text;
+
+        const date = new Date(normalized);
+        return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    function formatDate(value) {
+        const date = parseDate(value);
+
+        if (!date) {
+            return "—";
+        }
+
+        return date.toLocaleString([], {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    function getCountdown(record) {
+        const status = normalizeStatus(record);
+
+        if (["COMPLETED", "LANDED"].includes(status)) {
+            return {
+                text: "Completed",
+                className: "completed"
+            };
+        }
+
+        if (["CANCELLED", "FAILED"].includes(status)) {
+            return {
+                text: "Cancelled",
+                className: "completed"
+            };
+        }
+
+        if (["IN_PROGRESS", "AIRBORNE", "BOARDING"].includes(status)) {
+            return {
+                text: status.replaceAll("_", " "),
+                className: ""
+            };
+        }
+
+        const scheduledStart = getValue(
+            record,
+            ["scheduled_start", "scheduled_time", "start_time", "departure_time", "arrival_time"],
+            null
+        );
+
+        const date = parseDate(scheduledStart);
+
+        if (!date) {
+            return {
+                text: "Time unavailable",
+                className: ""
+            };
+        }
+
+        const remainingMs = date.getTime() - Date.now();
+
+        if (remainingMs < 0) {
+            return {
+                text: "Scheduled time passed",
+                className: "overdue"
+            };
+        }
+
+        const totalMinutes = Math.floor(remainingMs / 60000);
+        const days = Math.floor(totalMinutes / 1440);
+        const hours = Math.floor((totalMinutes % 1440) / 60);
+        const minutes = totalMinutes % 60;
+
+        let text = "";
+
+        if (days > 0) {
+            text = `${days}d ${hours}h ${minutes}m`;
+        } else if (hours > 0) {
+            text = `${hours}h ${minutes}m`;
+        } else {
+            text = `${minutes}m`;
+        }
+
+        return {
+            text: text,
+            className: ""
+        };
+    }
+
+    function normalizeSchedule(record) {
+        const airport = getNestedValue(
+            record,
+            ["airport"],
+            ["airport_name", "airport_code", "airport_id"]
+        );
+
+        const runway = getNestedValue(
+            record,
+            ["runway"],
+            ["runway_code", "runway_name", "runway_id"]
+        );
+
+        const atc = getNestedValue(
+            record,
+            ["atc", "controller"],
+            ["controller_name", "employee_name", "employee_code", "atc_id"]
+        );
+
+        return {
+            raw: record,
+            flightNumber: getValue(
+                record,
+                ["flight_number", "flight_no", "flight_code"],
+                "Unknown flight"
+            ),
+            operation: String(getValue(
+                record,
+                ["operation_type", "operation"],
+                "—"
+            )).toUpperCase(),
+            airport: airport,
+            runway: runway,
+            atc: atc,
+            start: getValue(
+                record,
+                ["scheduled_start", "scheduled_time", "start_time", "departure_time", "arrival_time"],
+                null
+            ),
+            end: getValue(
+                record,
+                ["scheduled_end", "end_time", "estimated_end"],
+                null
+            ),
+            status: normalizeStatus(record)
+        };
+    }
+
+    function updateStatistics(records) {
+        const normalized = records.map(normalizeSchedule);
+
+        document.getElementById("totalCount").textContent = normalized.length;
+
+        document.getElementById("upcomingCount").textContent =
+            normalized.filter(item =>
+                ["SCHEDULED", "WAITING"].includes(item.status)
+            ).length;
+
+        document.getElementById("activeCount").textContent =
+            normalized.filter(item =>
+                ["IN_PROGRESS", "AIRBORNE", "BOARDING"].includes(item.status)
+            ).length;
+
+        document.getElementById("completedCount").textContent =
+            normalized.filter(item =>
+                ["COMPLETED", "LANDED"].includes(item.status)
+            ).length;
+    }
+
+    function renderSchedules() {
+        const tbody = document.getElementById("scheduleTableBody");
+        const message = document.getElementById("message");
+
+        const search = document.getElementById("searchInput")
+            .value.trim().toLowerCase();
+
+        const statusFilter = document.getElementById("statusFilter").value;
+        const operationFilter = document.getElementById("operationFilter").value;
+
+        const filtered = allSchedules
+            .map(normalizeSchedule)
+            .filter(item => {
+                const searchable = [
+                    item.flightNumber,
+                    item.operation,
+                    item.airport,
+                    item.runway,
+                    item.atc,
+                    item.status
+                ].join(" ").toLowerCase();
+
+                return (
+                    (!search || searchable.includes(search)) &&
+                    (!statusFilter || item.status === statusFilter) &&
+                    (!operationFilter || item.operation === operationFilter)
+                );
+            });
+
+        document.getElementById("visibleCount").textContent =
+            `${filtered.length} record${filtered.length === 1 ? "" : "s"}`;
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = "";
+            message.style.display = "block";
+            message.textContent = allSchedules.length
+                ? "No flights match the selected filters."
+                : "No scheduled flights were returned by the API.";
+            return;
+        }
+
+        message.style.display = "none";
+
+        tbody.innerHTML = filtered.map(item => {
+            const countdown = getCountdown(item.raw);
+
+            return `
+                <tr>
+                    <td>
+                        <div class="flight-number">${escapeHtml(item.flightNumber)}</div>
+                        <div class="muted">Flight schedule</div>
+                    </td>
+                    <td>${escapeHtml(item.operation)}</td>
+                    <td>${escapeHtml(item.airport)}</td>
+                    <td>${escapeHtml(item.runway)}</td>
+                    <td>${escapeHtml(item.atc)}</td>
+                    <td>${escapeHtml(formatDate(item.start))}</td>
+                    <td>${escapeHtml(formatDate(item.end))}</td>
+                    <td>
+                        <span class="countdown ${countdown.className}">
+                            ${escapeHtml(countdown.text)}
+                        </span>
+                    </td>
+                    <td>${statusBadge(item.status)}</td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    async function loadSchedules() {
+        const message = document.getElementById("message");
+        const refreshButton = document.getElementById("refreshBtn");
+
+        refreshButton.disabled = true;
+        refreshButton.textContent = "Loading...";
+        message.style.display = "block";
+        message.classList.remove("error");
+        message.textContent = "Loading scheduled flights...";
+
+        try {
+            const response = await fetch(SCHEDULES_API, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
+
+            const contentType = response.headers.get("content-type") || "";
+
+            if (!response.ok) {
+                throw new Error(
+                    `API returned HTTP ${response.status}. Check the backend endpoint.`
+                );
+            }
+
+            if (!contentType.includes("application/json")) {
+                throw new Error(
+                    "The schedules API did not return JSON. Add the /api/schedules backend route."
+                );
+            }
+
+            const payload = await response.json();
+
+            if (Array.isArray(payload)) {
+                allSchedules = payload;
+            } else if (Array.isArray(payload.schedules)) {
+                allSchedules = payload.schedules;
+            } else if (Array.isArray(payload.data)) {
+                allSchedules = payload.data;
+            } else if (Array.isArray(payload.flights)) {
+                allSchedules = payload.flights;
+            } else {
+                throw new Error(
+                    payload.message || "The API response does not contain a schedules array."
+                );
+            }
+
+            updateStatistics(allSchedules);
+            renderSchedules();
+
+        } catch (error) {
+            allSchedules = [];
+            updateStatistics([]);
+
+            document.getElementById("scheduleTableBody").innerHTML = "";
+            message.style.display = "block";
+            message.classList.add("error");
+            message.textContent = error.message;
+
+            console.error("Unable to load schedules:", error);
+
+        } finally {
+            refreshButton.disabled = false;
+            refreshButton.textContent = "Refresh Data";
+        }
+    }
+
+    function clearFilters() {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("statusFilter").value = "";
+        document.getElementById("operationFilter").value = "";
+        renderSchedules();
+    }
+
+    document.getElementById("searchInput")
+        .addEventListener("input", renderSchedules);
+
+    document.getElementById("statusFilter")
+        .addEventListener("change", renderSchedules);
+
+    document.getElementById("operationFilter")
+        .addEventListener("change", renderSchedules);
+
+    loadSchedules();
+
+    // Refresh countdown values without reloading the database.
+    countdownInterval = setInterval(renderSchedules, 30000);
+
+    // Periodically refresh schedule data from the backend.
+    setInterval(loadSchedules, 60000);
+</script>
+</body>
+</html>
